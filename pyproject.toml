@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "turbid"
+version = "0.1.0"
+description = "Transparent obfuscation of numeric IDs"
+authors = ["Pedro Werneck <pjwerneck@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+ff3 = "^1.0.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+black = "^24.4.2"
+isort = "^5.13.2"
+ruff = "^0.5.5"
+hypothesis = "^6.108.5"
+faker = "^26.0.0"
+pytest-profiling = "^1.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+force_single_line = "True"
+line_length = 99
+
+[tool.black]
+line-length = 99
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "-vv"]
+console_output_style = "progress"
