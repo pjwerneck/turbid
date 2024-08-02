@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "turbid"
-version = "0.1.0"
+version = "0.1.1"
 description = "Transparent obfuscation of numeric IDs"
 authors = ["Pedro Werneck <pjwerneck@gmail.com>"]
 license = "MIT"
