@@ -1,6 +1,7 @@
 import hashlib
 import math
 import string
+import sys
 
 from ff3 import FF3Cipher
 
@@ -131,10 +132,13 @@ class TurbIDCipher:
         Raises:
             InvalidID: If the ID is too long for the specified length.
         """
+        if int_id > sys.maxsize:
+            raise InvalidID("ID is too large to encrypt.")
+
         as_str = str(int_id)
         # we need 1 digit for the check digit
         if len(as_str) - 1 > self.length:
-            raise InvalidID("ID is too long for the specified length")
+            raise InvalidID("ID is too long to encrypt.")
 
         # after adding the check digit, we pad the int with zeros to the length
         # so the FPE cipher outputs a string of the expected length

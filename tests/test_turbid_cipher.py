@@ -30,6 +30,101 @@ py_keys = st.text(min_size=128, max_size=128)
 py_key_pairs = st.tuples(py_keys, py_keys)
 
 
+def test_init_fails_alphabet_non_printable():
+    with pytest.raises(ValueError) as exc:
+        TurbIDCipher(
+            key="key",
+            tweak="non_printable_alphabet",
+            length=20,
+            alphabet="".join(chr(i) for i in range(32)),
+            key_length=128,
+        )
+
+    assert str(exc.value) == "The alphabet must contain only printable ASCII characters"
+
+
+def test_init_fails_alphabet_duplicate_character():
+    with pytest.raises(ValueError) as exc:
+        TurbIDCipher(
+            key="key",
+            tweak="duplicate_character",
+            length=20,
+            alphabet="0123456789abcdef0",
+            key_length=128,
+        )
+
+    assert str(exc.value) == "The alphabet must not contain duplicate characters"
+
+
+def test_init_fails_alphabet_missing_digit():
+    with pytest.raises(ValueError) as exc:
+        TurbIDCipher(
+            key="key",
+            tweak="missing_digit",
+            length=20,
+            alphabet="abcdef",
+            key_length=128,
+        )
+
+    assert str(exc.value) == "The alphabet must contain all digits"
+
+
+def test_init_fails_too_short():
+    with pytest.raises(ValueError) as exc:
+        TurbIDCipher(
+            key="key",
+            tweak="too short",
+            length=3,
+            alphabet=alphabet_alnum,
+            key_length=128,
+        )
+
+    assert str(exc.value).startswith("With the given alphabet")
+
+
+def test_init_fails_too_long():
+    with pytest.raises(ValueError) as exc:
+        TurbIDCipher(
+            key="key",
+            tweak="too long",
+            length=100,
+            alphabet=alphabet_alnum,
+            key_length=128,
+        )
+
+    assert str(exc.value).startswith("With the given alphabet")
+
+
+def test_encrypt_fails_with_large_id():
+    cipher = TurbIDCipher(
+        key="key",
+        tweak="long_id",
+        length=20,
+        alphabet=alphabet_alnum,
+        key_length=128,
+    )
+
+    with pytest.raises(ValueError) as exc:
+        cipher.encrypt(10**20)
+
+    assert str(exc.value) == "ID is too large to encrypt."
+
+
+def test_encrypt_fails_with_long_id():
+    cipher = TurbIDCipher(
+        key="key",
+        tweak="long_id",
+        length=10,
+        alphabet=alphabet_alnum,
+        key_length=128,
+    )
+
+    with pytest.raises(ValueError) as exc:
+        cipher.encrypt(10**11)
+
+    assert str(exc.value) == "ID is too long to encrypt."
+
+
 @given(py_int_ids, py_lengths, py_alphabets, py_key_lengths, py_keys)
 def test_encrypt_and_decrypt(int_id, length, alphabet, key_length, key):
     cipher = TurbIDCipher(
