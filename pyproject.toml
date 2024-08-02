@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 ff3 = "^1.0.2"
-sqlalchemy = { version = "^1.4.0", optional = true }
+sqlalchemy = { version = ">=1.4.0,<3.0.0", optional = true }
 
 [tool.poetry.extras]
 sqlalchemy = ["sqlalchemy"]
