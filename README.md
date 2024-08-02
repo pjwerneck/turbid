@@ -1,7 +1,5 @@
 # TurbID
-[![PyPI version](https://badge.fury.io/py/TurbID.svg)](https://badge.fury.io/py/TurbID)
-[![Build Status](https://travis-ci.com/obscuritylabs/TurbID.svg?branch=master)](https://travis-ci.com/obscuritylabs/TurbID)
-[![Coverage Status](https://coveralls.io/repos/github/obscuritylabs/TurbID/badge.svg?branch=master)](https://coveralls.io/github/obscuritylabs/TurbID?branch=master)
+[![Build Status](https://github.com/pjwerneck/turbid/actions/workflows/pytest.yml/badge.svg?branch=main)](https://github.com/pjwerneck/turbid/actions/workflows/pytest.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
@@ -34,4 +32,19 @@ pip, or your package manager of choice:
 ```bash
 pip install turbid
 ```
+
+But you probably want to install with the optional SQLAlchemy extension:
+
+```bash
+pip install turbid[sqlalchemy]
+```
+
+## Usage
+
+TBD
+
+## License
+
+TurbID is licensed under the MIT License. See the [LICENSE](LICENSE) file for
+details.
 
