@@ -6,9 +6,11 @@ on:
   pull_request:
     types: [ ready_for_review, opened, synchronize, reopened, converted_to_draft ]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -16,34 +18,21 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
       id: setup-python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Load cached venv
-      id: cached-poetry
-      uses: actions/cache@v3
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-    - name: Install Poetry
-      if: steps.cached-poetry.outputs.cache-hit != 'true'
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-        installer-parallel: true
-
+        python-version: ${{ matrix.python-version }}
+    
     - name: Install dependencies
-      if: steps.cached-poetry.outputs.cache-hit != 'true'
-      run: |
-        poetry install --no-interaction --no-root -vv --extras sqlalchemy
-
+      run: uv sync --all-extras --dev
 
     - name: Test with pytest
       run: |

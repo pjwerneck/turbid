@@ -3,7 +3,10 @@ import math
 import string
 import sys
 
-from ff3 import FF3Cipher
+from fastfpe import ff3_1
+
+RADIX_MAX = 256
+DOMAIN_MIN = 1_000_000  # 1M required in FF3-1
 
 
 def check_digit(value: str) -> str:
@@ -54,23 +57,19 @@ class TurbIDCipher:
         key_length: int = 128,
     ):
         radix = len(alphabet)
-        if radix < 2 or radix > FF3Cipher.RADIX_MAX:
-            raise ValueError(
-                f"The alphabet must be between 2 and {FF3Cipher.RADIX_MAX} ASCII characters"
-            )
+        if radix < 2 or radix > RADIX_MAX:
+            raise ValueError(f"The alphabet must be between 2 and {RADIX_MAX} ASCII characters")
 
         if len(set(alphabet)) != len(alphabet):
             raise ValueError("The alphabet must not contain duplicate characters")
 
         if not all(c in string.printable for c in alphabet):
-            raise ValueError(
-                "The alphabet must contain only printable ASCII characters"
-            )
+            raise ValueError("The alphabet must contain only printable ASCII characters")
 
         if not all(c in alphabet for c in string.digits):
             raise ValueError("The alphabet must contain all digits")
 
-        self.min_len = math.ceil(math.log(FF3Cipher.DOMAIN_MIN) / math.log(radix))
+        self.min_len = math.ceil(math.log(DOMAIN_MIN) / math.log(radix))
         self.max_len = 2 * math.floor(96 / math.log2(radix))
 
         if length < self.min_len or length > self.max_len:
@@ -89,9 +88,7 @@ class TurbIDCipher:
 
         # ff3-1 expects a 32-byte key, so hash the provided key to the specified
         # key length
-        keyhash = hashlib.blake2b(
-            key.encode(), digest_size=self.key_length // 8
-        ).hexdigest()
+        self.keyhash = hashlib.blake2b(key.encode(), digest_size=self.key_length // 8).hexdigest()
 
         # ff3-1 expects a 7 bytes tweak, so we use blake2b to get a 7-byte hash.
         #
@@ -101,7 +98,7 @@ class TurbIDCipher:
         # the same ciphertext each time, so we use a fixed tweak
         self._tweak = hashlib.blake2b(self.tweak.encode(), digest_size=7).hexdigest()
 
-        self._ff3 = FF3Cipher.withCustomAlphabet(keyhash, self._tweak, self.alphabet)
+        # self._ff3 = #FF3Cipher.withCustomAlphabet(keyhash, self._tweak, self.alphabet)
 
     def _add_check_digit(self, int_as_str: str) -> str:
         # Decrypting a random string, tampered ID, or ID created with a
@@ -142,7 +139,12 @@ class TurbIDCipher:
 
         # after adding the check digit, we pad the int with zeros to the length
         # so the FPE cipher outputs a string of the expected length
-        return self._ff3.encrypt(self._add_check_digit(as_str).zfill(self.length))
+        return ff3_1.encrypt(
+            self.keyhash,
+            self._tweak,
+            self.alphabet,
+            self._add_check_digit(as_str).zfill(self.length),
+        )
 
     def decrypt(self, str_id: str) -> int:
         """
@@ -162,6 +164,8 @@ class TurbIDCipher:
         if id_length != self.length:
             raise InvalidID("ID length does not match the expected length.")
 
-        decrypted_value = self._ff3.decrypt(str_id)
+        decrypted_value = ff3_1.decrypt(self.keyhash, self._tweak, self.alphabet, str_id)
+
+        # self._ff3.decrypt(str_id)
 
         return int(self._verify_check_digit(decrypted_value))

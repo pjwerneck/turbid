@@ -3,6 +3,7 @@ import string
 import sys
 
 import pytest
+from fastfpe import ff3_1
 from hypothesis import assume
 from hypothesis import given
 from hypothesis import settings
@@ -206,9 +207,7 @@ def test_same_key_different_tweak_fails(int_id, length, alphabet, key_length, ke
 
 
 @given(py_int_ids, py_lengths, py_alphabets, py_key_lengths, py_keys, py_keys)
-def test_same_tweak_different_key_fails(
-    int_id, length, alphabet, key_length, key1, key2
-):
+def test_same_tweak_different_key_fails(int_id, length, alphabet, key_length, key1, key2):
     assume(key1 != key2)
 
     cipher1 = TurbIDCipher(
@@ -317,11 +316,8 @@ def test_check_digit_catches_invalid_id(length, random_seeder):
     # all digits string, but not match the expected value
     while True:
         str_id = "".join(random.choice(alphabet) for _ in range(length))
-        decrypted_value = cipher._ff3.decrypt(str_id)
-        if (
-            decrypted_value.isdigit()
-            and cipher.encrypt(int(str(decrypted_value[:-1]))) != str_id
-        ):
+        decrypted_value = ff3_1.decrypt(cipher.keyhash, cipher._tweak, cipher.alphabet, str_id)
+        if decrypted_value.isdigit() and cipher.encrypt(int(str(decrypted_value[:-1]))) != str_id:
             break
 
     with pytest.raises(InvalidID) as exc:
