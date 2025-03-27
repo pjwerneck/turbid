@@ -24,9 +24,7 @@ class TurbIDType(TypeDecorator):
     ):
         super().__init__(*args, **kwargs)
 
-        self._turbid = TurbIDCipher(
-            key=key, tweak=tweak, length=length, alphabet=alphabet
-        )
+        self._turbid = TurbIDCipher(key=key, tweak=tweak, length=length, alphabet=alphabet)
 
     def process_bind_param(self, value, dialect):
         if value is None or isinstance(value, int):
@@ -62,9 +60,7 @@ class PrefixedTurbIDType(TypeDecorator):
                 "If you don't want to use a prefix, use TurbIDType instead."
             )
 
-        self._turbid = TurbIDCipher(
-            key=key, tweak=prefix, length=length, alphabet=alphabet
-        )
+        self._turbid = TurbIDCipher(key=key, tweak=prefix, length=length, alphabet=alphabet)
 
         self._prefix = prefix
 
@@ -89,9 +85,7 @@ class PrefixedTurbIDType(TypeDecorator):
 class TurbIDProxy:
     def __init__(self, column, key, tweak, length=24, alphabet=alphabet_alnum):
         self._column = column
-        self._turbid = TurbIDCipher(
-            key=key, tweak=tweak, length=length, alphabet=alphabet
-        )
+        self._turbid = TurbIDCipher(key=key, tweak=tweak, length=length, alphabet=alphabet)
 
     def __get__(self, obj, cls=None):
         if obj is None:
@@ -100,7 +94,9 @@ class TurbIDProxy:
         return self._turbid.encrypt(getattr(obj, self._column.name))
 
     def __set__(self, obj, value):
-        setattr(obj, self._column.name, self._turbid.decrypt(value))
+        if value is not None:
+            value = self._turbid.decrypt(value)
+        setattr(obj, self._column.name, value)
 
     def __eq__(self, other):
         return self._column == self._turbid.decrypt(other)

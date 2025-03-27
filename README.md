@@ -3,6 +3,19 @@
 [![Build Status](https://github.com/pjwerneck/turbid/actions/workflows/pytest.yml/badge.svg?branch=main)](https://github.com/pjwerneck/turbid/actions/workflows/pytest.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
+
+- [TurbID](#turbid)
+  - [Overview](#overview)
+  - [Installation](#installation)
+  - [SQLAlchemy Usage](#sqlalchemy-usage)
+  - [TurbIDCipher Usage](#turbidcipher-usage)
+  - [Parameters](#parameters)
+  - [Compatibility and Testing](#compatibility-and-testing)
+  - [License](#license)
+
+
+
+
 ## Overview
 
 TurbID is a Python library that provides ID obfuscation and encryption for

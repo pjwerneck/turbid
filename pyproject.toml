@@ -12,6 +12,10 @@ version = "0.2.0"
 description = "Transparent obfuscation of numeric IDs"
 readme = "README.md"
 
+[project.urls]
+Repository = "https://github.com/pjwerneck/turbid"
+"Bug Tracker" = "https://github.com/pjwerneck/turbid/issues"
+
 [project.optional-dependencies]
 sqlalchemy = [
     "sqlalchemy<3.0.0,>=1.4.0",

@@ -57,22 +57,15 @@ class TestPrefixedTurbIDType(BaseTestCase):
 
         int_id = user_model.user_id.type._turbid.decrypt(user.user_id[-24:])
 
-        raw_user = session.execute(
-            text(f"SELECT * FROM user WHERE user_id = {int_id}")
-        ).first()
+        raw_user = session.execute(text(f"SELECT * FROM user WHERE user_id = {int_id}")).first()
 
         assert raw_user.name == user.name
 
     def test_query_by_str_id(self, session, user_model):
         int_id = 1
-        raw_user = session.execute(
-            text(f"SELECT * FROM user WHERE user_id = {int_id}")
-        ).first()
+        raw_user = session.execute(text(f"SELECT * FROM user WHERE user_id = {int_id}")).first()
 
-        str_id = (
-            user_model.user_id.type._prefix
-            + user_model.user_id.type._turbid.encrypt(int_id)
-        )
+        str_id = user_model.user_id.type._prefix + user_model.user_id.type._turbid.encrypt(int_id)
 
         assert str_id.startswith("us_")
 
@@ -109,17 +102,13 @@ class TestTurbIDType(BaseTestCase):
 
         int_id = user_model.user_id.type._turbid.decrypt(user.user_id)
 
-        raw_user = session.execute(
-            text(f"SELECT * FROM user WHERE user_id = {int_id}")
-        ).first()
+        raw_user = session.execute(text(f"SELECT * FROM user WHERE user_id = {int_id}")).first()
 
         assert raw_user.name == user.name
 
     def test_query_by_str_id(self, session, user_model):
         int_id = 1
-        raw_user = session.execute(
-            text(f"SELECT * FROM user WHERE user_id = {int_id}")
-        ).first()
+        raw_user = session.execute(text(f"SELECT * FROM user WHERE user_id = {int_id}")).first()
 
         str_id = user_model.user_id.type._turbid.encrypt(int_id)
 
@@ -157,17 +146,13 @@ class TestTurbIDProxy(BaseTestCase):
 
         int_id = user_model.user_id._turbid.decrypt(user.user_id)
 
-        raw_user = session.execute(
-            text(f"SELECT * FROM user WHERE _id = {int_id}")
-        ).first()
+        raw_user = session.execute(text(f"SELECT * FROM user WHERE _id = {int_id}")).first()
 
         assert raw_user.name == user.name
 
     def test_query_by_str_id(self, session, user_model):
         int_id = 1
-        raw_user = session.execute(
-            text(f"SELECT * FROM user WHERE _id = {int_id}")
-        ).first()
+        raw_user = session.execute(text(f"SELECT * FROM user WHERE _id = {int_id}")).first()
 
         str_id = user_model.user_id._turbid.encrypt(int_id)
 
@@ -179,3 +164,20 @@ class TestTurbIDProxy(BaseTestCase):
 
         assert user.name == raw_user.name
         assert user.user_id == str_id
+
+    def test_query_order_by(self, session, user_model):
+        # Test ordering by encrypted ID
+        users = session.execute(select(user_model).order_by(user_model._id.desc())).scalars().all()
+
+        # Order should be preserved when accessing through proxy
+        encrypted_ids = [u.user_id for u in users]
+        assert encrypted_ids == [user_model.user_id._turbid.encrypt(u._id) for u in users]
+
+    def test_proxy_comparison(self, session, user_model):
+        user = session.execute(select(user_model)).scalars().first()
+        str_id = user.user_id
+
+        # Test direct comparison
+        assert user.user_id == str_id
+        assert user.user_id != "invalid_id"
+        assert user.user_id != user_model.user_id._turbid.encrypt(999)
