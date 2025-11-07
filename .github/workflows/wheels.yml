@@ -27,6 +27,15 @@ jobs:
       - name: Build sdist and wheel
         run: uv build
 
+      - name: Verify wheel is universal (py3-none-any)
+        run: |
+          WHEEL=$(ls dist/*.whl | head -n1)
+          echo "Built wheel: $WHEEL"
+          case "$WHEEL" in
+            *py3-none-any.whl) echo "OK: universal wheel tag";;
+            *) echo "ERROR: wheel is not universal (py3-none-any)."; exit 1;;
+          esac
+
 
   publish:
     name: Publish to PyPI
