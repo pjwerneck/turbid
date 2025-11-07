@@ -8,7 +8,7 @@ dependencies = [
     "fastfpe<1.0.0,>=0.2.0",
 ]
 name = "turbid"
-version = "0.2.1"
+version = "0.2.2"
 description = "Transparent obfuscation of numeric IDs"
 readme = "README.md"
 
