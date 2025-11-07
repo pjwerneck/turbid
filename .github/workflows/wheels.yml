@@ -7,14 +7,15 @@ on:
       - "v*"
 
 jobs:
-  build:
-    name: Build and publish to PyPI
+  release:
+    name: Test, build and publish
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      
+    permissions:
+      id-token: write  # enable OIDC for trusted publishing
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,6 +24,12 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v4
+
+      - name: Install dev dependencies
+        run: uv sync --group dev
+
+      - name: Run tests
+        run: uv run pytest -q
 
       - name: Build sdist and wheel
         run: uv build
@@ -36,17 +43,15 @@ jobs:
             *) echo "ERROR: wheel is not universal (py3-none-any)."; exit 1;;
           esac
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
 
-  publish:
-    name: Publish to PyPI
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
       - name: Publish to PyPI (token)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
+
